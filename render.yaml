@@ -63,6 +63,12 @@ services:
     dockerContext: ./frontend
     plan: free
     region: oregon
+    healthCheckPath: /api/health
+    dockerBuildArgs:
+      - key: NEXT_PUBLIC_API_HOST
+        value: agentwatch-api-zefd.onrender.com
+      - key: NEXT_PUBLIC_WS_URL
+        value: wss://agentwatch-api-zefd.onrender.com/ws/events
     envVars:
       - key: AGENTWATCH_API_URL
         value: https://agentwatch-api-zefd.onrender.com

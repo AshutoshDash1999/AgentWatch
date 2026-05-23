@@ -52,6 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       method: req.method ?? 'GET',
       headers: forwardHeaders,
       body: requestBody,
+      signal: AbortSignal.timeout(30_000),
     })
 
     res.status(upstreamRes.status)

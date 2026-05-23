@@ -9,6 +9,13 @@ RUN npm ci
 # overwrite the just-installed Linux-native packages with Windows ones
 COPY . .
 
+# NEXT_PUBLIC_* vars are inlined at build time, not available at runtime.
+# Pass them as build args so they are baked into the JS bundle correctly.
+ARG NEXT_PUBLIC_API_HOST
+ARG NEXT_PUBLIC_WS_URL
+ENV NEXT_PUBLIC_API_HOST=$NEXT_PUBLIC_API_HOST
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
+
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
