@@ -1,5 +1,3 @@
-'use client'
-
 import type { ComponentType } from 'react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
@@ -30,6 +28,16 @@ const STATUS_COLORS: Record<string, string> = {
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
+}
+
+function safeFormat(ts: string | null | undefined, fmt: string): string {
+  if (!ts) return '—'
+  try { return format(new Date(ts), fmt) } catch { return '—' }
+}
+
+function safeDistanceToNow(ts: string | null | undefined): string {
+  if (!ts) return '—'
+  try { return formatDistanceToNow(new Date(ts), { addSuffix: true }) } catch { return '—' }
 }
 
 function statusBadge(status: string) {
@@ -90,7 +98,7 @@ function LiveEventFeed({ events }: { events: AgentEvent[] }) {
                 <div className="truncate font-medium text-zinc-200">{event.event_type}</div>
                 <div className="truncate font-mono text-zinc-500">{event.tool_call?.raw_command ?? event.tool_call?.tool_name ?? event.agent_id}</div>
               </div>
-              <div className="shrink-0 text-zinc-500">{format(new Date(event.timestamp), 'HH:mm:ss')}</div>
+              <div className="shrink-0 text-zinc-500">{safeFormat(event.timestamp, 'HH:mm:ss')}</div>
             </div>
           </div>
         ))}
@@ -132,7 +140,7 @@ function SessionsTable({ sessions }: { sessions: AgentSession[] }) {
                 <td className="px-4 py-3 text-right font-mono text-zinc-300">{session.total_events}</td>
                 <td className="px-4 py-3 text-right font-mono text-zinc-300">{session.total_tokens.toLocaleString()}</td>
                 <td className="px-4 py-3 text-right font-mono text-zinc-300">${session.estimated_cost_usd.toFixed(4)}</td>
-                <td className="px-4 py-3 text-right text-xs text-zinc-500">{formatDistanceToNow(new Date(session.started_at), { addSuffix: true })}</td>
+                <td className="px-4 py-3 text-right text-xs text-zinc-500">{safeDistanceToNow(session.started_at)}</td>
                 <td className="px-5 py-3 text-zinc-500"><ChevronRight size={14} /></td>
               </tr>
             ))}
@@ -156,7 +164,7 @@ function SafetyPanel({ blockedEvents }: { blockedEvents: AgentEvent[] }) {
           <div key={event.event_id} className="rounded-xl border border-amber-500/10 bg-black/10 p-3 text-xs">
             <div className="flex items-center justify-between gap-3">
               <div className="font-medium text-zinc-200">{event.tool_call?.tool_name ?? event.event_type}</div>
-              <div className="text-zinc-500">{format(new Date(event.timestamp), 'HH:mm:ss')}</div>
+              <div className="text-zinc-500">{safeFormat(event.timestamp, 'HH:mm:ss')}</div>
             </div>
             <div className="mt-1 truncate font-mono text-zinc-500">{event.tool_call?.raw_command}</div>
             <div className="mt-2 text-amber-300">{event.safety?.reasons?.[0] ?? 'Blocked by policy'}</div>
@@ -174,6 +182,8 @@ export default function DashboardPage() {
   const [liveEvents, setLiveEvents] = useState<AgentEvent[]>([])
 
   useEffect(() => {
+    // createEventSocket accesses window — guard against any accidental SSR path
+    if (typeof window === 'undefined') return
     const ws = createEventSocket((event) => {
       setLiveEvents((previous) => [event, ...previous].slice(0, 200))
       refreshSummary()

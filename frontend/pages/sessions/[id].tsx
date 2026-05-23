@@ -1,10 +1,13 @@
-'use client'
-
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import useSWR from 'swr'
 import { AlertTriangle, ArrowLeft, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
 import { format } from 'date-fns'
+
+function safeFormat(ts: string | null | undefined, fmt: string): string {
+  if (!ts) return '—'
+  try { return format(new Date(ts), fmt) } catch { return '—' }
+}
 
 import { FailureAnalysis, ReplayStep, api } from '../../lib/api'
 
@@ -45,7 +48,7 @@ function EventRow({ step }: { step: ReplayStep }) {
         <span className="min-w-0 flex-1 truncate text-zinc-200">{step.event.event_type}</span>
         <span className="font-mono text-xs text-zinc-500">{step.event.tool_call?.tool_name ?? '—'}</span>
         <span>{statusBadge(step.event.status)}</span>
-        <span className="text-xs text-zinc-500">{format(new Date(step.event.timestamp), 'HH:mm:ss.SSS')}</span>
+        <span className="text-xs text-zinc-500">{safeFormat(step.event.timestamp, 'HH:mm:ss.SSS')}</span>
         {expanded ? <ChevronUp size={14} className="text-zinc-500" /> : <ChevronDown size={14} className="text-zinc-500" />}
       </button>
       {expanded ? (
