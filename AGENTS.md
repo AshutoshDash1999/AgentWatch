@@ -78,6 +78,16 @@ Copy `.env.example` to `.env`. Key vars:
 - `AGENTWATCH_API_KEY` — required in production, optional in dev
 - `ANTHROPIC_API_KEY` — used by Reasoning Auditor
 
+## Installed Skills (`.agents/skills/`)
+
+| Skill | Use Case |
+|---|---|
+| `docker-expert` | Optimize Dockerfiles, harden container security, design multi-stage builds, troubleshoot compose setups |
+| `python-design-patterns` | Refactor God classes, pick composition vs inheritance, reduce coupling, structure new services cleanly |
+| `python-observability` | Add structured logging, wire up Prometheus metrics, set up distributed tracing, debug prod issues |
+| `seo-audit` | Audit meta tags, diagnose ranking drops, fix crawl/indexing errors, review Core Web Vitals |
+| `wcag-audit-patterns` | Run WCAG 2.2 accessibility audits, fix violations, implement accessible components, meet ADA/508 |
+
 ## Gotchas
 
 - `agentwatch-landing/` already has its own `AGENTS.md` (Next.js 16 rules). Do not overwrite it.
